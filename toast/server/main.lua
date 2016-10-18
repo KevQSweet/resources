@@ -2,25 +2,28 @@
 
 local firstspawn = true
 Users = {}
-RegisterServerEvent("debugLogs")
+debugMode = false
 
-RegisterServerEvent("chatCommandEntered")
+--CoreEvents
 RegisterServerEvent("onPlayerConnect")
-RegisterServerEvent("giveMeWelfare")
-
+RegisterServerEvent("chatCommandEntered")
 RegisterServerEvent("baseevents:onPlayerKilled")
+RegisterServerEvent("consoleLog122")
 
-RegisterServerEvent("spawnPersonalVehicle")
+--Gameplay Events
+RegisterServerEvent("giveMeWelfare")
+RegisterServerEvent("killPedCount")
 
--- Gun stuff
-local spawnAbleWeapons = {"WEAPON_KNIFE", "WEAPON_NIGHTSTICK", "WEAPON_HAMMER", "WEAPON_BAT", "WEAPON_GOLFCLUB", "WEAPON_CROWBAR","WEAPON_PISTOL", "WEAPON_COMBATPISTOL", "WEAPON_APPISTOL", "WEAPON_PISTOL50", "WEAPON_MICROSMG", "WEAPON_SMG", "WEAPON_ASSAULTSMG", "WEAPON_ASSAULTRIFLE", "WEAPON_CARBINERIFLE", "WEAPON_ADVANCEDRIFLE", "WEAPON_MG", "WEAPON_COMBATMG", "WEAPON_PUMPSHOTGUN", "WEAPON_SAWNOFFSHOTGUN", "WEAPON_ASSAULTSHOTGUN", "WEAPON_BULLPUPSHOTGUN","WEAPON_STUNGUN", "WEAPON_SNIPERRIFLE", "WEAPON_SMOKEGRENADE", "WEAPON_BZGAS", "WEAPON_MOLOTOV", "WEAPON_FIREEXTINGUISHER", "WEAPON_PETROLCAN", "WEAPON_SNSPISTOL", "WEAPON_SPECIALCARBINE", "WEAPON_HEAVYPISTOL", "WEAPON_BULLPUPRIFLE", "WEAPON_HOMINGLAUNCHER", "WEAPON_PROXMINE", "WEAPON_SNOWBALL", "WEAPON_VINTAGEPISTOL", "WEAPON_DAGGER", "WEAPON_FIREWORK", "WEAPON_MUSKET", "WEAPON_MARKSMANRIFLE", "WEAPON_HEAVYSHOTGUN", "WEAPON_GUSENBERG", "WEAPON_HATCHET", "WEAPON_COMBATPDW", "WEAPON_KNUCKLE", "WEAPON_MARKSMANPISTOL", "WEAPON_BOTTLE", "WEAPON_FLAREGUN", "WEAPON_FLARE", "WEAPON_REVOLVER", "WEAPON_SWITCHBLADE", "WEAPON_MACHETE", "WEAPON_FLASHLIGHT", "WEAPON_MACHINEPISTOL", "WEAPON_DBSHOTGUN", "WEAPON_COMPACTRIFLE"}
-local adminGuns = {"WEAPON_RAILGUN", "WEAPON_HEAVYSNIPER", "WEAPON_GRENADELAUNCHER", "WEAPON_GRENADELAUNCHER_SMOKE", "WEAPON_RPG", "WEAPON_MINIGUN", "WEAPON_GRENADE", "WEAPON_STICKYBOMB"}
+--Set Welfare Amount
+local welfareCheck = 200
+local debugMode = true
 
-AddEventHandler('debugThis', function()
+
+AddEventHandler('consoleLog122', function()
 	print("testing")
 end)
 
-AddEventHandler('onPlayerConnect', function()	 
+AddEventHandler('onPlayerConnect', function()	
 	
 	
 	if(Users[GetPlayerName(source)] == nil)then
@@ -28,36 +31,59 @@ AddEventHandler('onPlayerConnect', function()
 		if hasAccount(source) then
 			print("User has account: "..GetPlayerName(source))
 			Users[GetPlayerName(source)] = LoadUser(source)
-			TriggerClientEvent("AwesomeFreeze", source, true)
-			TriggerClientEvent("AwesomeInvisible", source, true)
-
-			SendPlayerChatMessage(source, "🔒 Your account have been found on our database type ^1/login ^7[^2Your Password^7]")
+			TriggerClientEvent("stateFreeze", source, true)
+			TriggerClientEvent("stateInvisible", source, true)
+			SendPlayerChatMessage(source, "?? Your account have been found on our database type ^1/login ^7[^2Your Password^7]")
 		else
-			TriggerClientEvent("AwesomeFreeze", source, true)
-			TriggerClientEvent("AwesomeInvisible", source, true)
+			TriggerClientEvent("stateFreeze", source, true)
+			TriggerClientEvent("stateInvisibleInvisible", source, true)
 			
-			SendPlayerChatMessage(source, "🔒 Please ^1register^7 with this command ^1/register ^7[^2Your Password^7]")
+			SendPlayerChatMessage(source, "?? Please ^1register^7 with this command ^1/register ^7[^2Your Password^7]")
 		end
 	end
 	TriggerClientEvent("teleportSpawning", source)
 end)
 
-
-AddEventHandler('playerDropped', function(reason)
-	-- Check if Usersrow is existing -> Deleting Users var at disconnect
-	local localname = GetPlayerName(source)
-	print("Player " .. GetPlayerName(source) .. " disconnected. Reason: "..reason)
-	
-	Users[localname] = nil
-end)
-
 AddEventHandler('giveMeWelfare', function()
 	if(hasAccount(source)) then
 		if(isLoggedIn(source)) then
-			Users[GetPlayerName(source)]['money'] = Users[GetPlayerName(source)]['money'] + 200
+			Users[GetPlayerName(source)]['money'] = Users[GetPlayerName(source)]['money'] + welfareCheck
 			saveMoney(source)
-			TriggerClientEvent("clientPaid")
-			Print(GetPlayerName(source).." has collected their welfare.")
+			TriggerClientEvent("clientPaid", source, welfareCheck)
+		end
+	end
+end)
+	
+AddEventHandler('chatCommandEntered', function(fullcommand)
+	command = stringsplit(fullcommand, " ")
+
+	if not isLoggedIn(source) then
+		if(command[1] == "/register") then
+			if(command[2] ~= nil) then
+				registerUser(command[2])
+			else
+				SendPlayerChatMessage(source, "USAGE: /register password", { 0, 0x99, 255})
+			end
+		elseif(command[1] == "/t")then
+			TriggerClientEvent("getPosition", source)
+		elseif(command[1] == "/login") then
+			if(command[2] ~= nil) then
+				loginUser(command[2])
+			else
+				SendPlayerChatMessage(source, "USAGE: /login password", { 0, 0x99, 255})
+			end
+		else
+			if(hasAccount(source)) then
+				SendPlayerChatMessage(source, "^1Please login first using: /login [password]", { 0, 0x99, 255})
+			else
+				SendPlayerChatMessage(source, "^1Please register first using: /register [password]", { 0, 0x99, 255})
+			end
+		end
+
+		return
+	else
+		if (command[1] == "/pos") then	
+			TriggerClientEvent("getPosition", source)
 		end
 	end
 end)
@@ -72,34 +98,13 @@ AddEventHandler('baseevents:onPlayerKilled', function(killer, kilerT)
 	end
 end)
 
-AddEventHandler('chatCommandEntered', function(fullcommand)
-	command = stringsplit(fullcommand, " ")
-
-	if not isLoggedIn(source) then
-		if(command[1] == "/register") then
-			if(command[2] ~= nil) then
-				registerUser(command[2])
-			else
-				SendPlayerChatMessage(source, "USAGE: /register password", { 0, 0x99, 255})
-			end
-		elseif(command[1] == "/t")then
-			TriggerClientEvent("thisPos", source)
-		elseif(command[1] == "/login") then
-			if(command[2] ~= nil) then
-				loginUser(command[2])
-			else
-				SendPlayerChatMessage(source, "USAGE: /login password", { 0, 0x99, 255})
-			end
-		else
-			if(hasAccount(source)) then
-				SendPlayerChatMessage(source, "^1Please login first using: /login [password]", { 0, 0x99, 255})
-			else
-				SendPlayerChatMessage(source, "^1Please register first using: /register [password]", { 0, 0x99, 255})
-			end
-		end
-		return
+--Server Functions
+function SendPlayerChatMessage(source, message, color)
+	if(color == nil) then
+		color = { 0, 0x99, 255}
 	end
-end)
+	TriggerClientEvent("chatMessage", source, '', color, message)
+end
 
 function stringsplit(self, delimiter)
   local a = self:Split(delimiter)
@@ -111,21 +116,3 @@ function stringsplit(self, delimiter)
 
   return t
 end
-
-function SendPlayerChatMessage(source, message, color)
-	if(color == nil) then
-		color = { 0, 0x99, 255}
-	end
-	TriggerClientEvent("chatMessage", source, '', color, message)
-end
-
-AddEventHandler('debugLogs', function(consoleMessageLog)
-	if consoleMessageLog == nil then
-		print("debug triggered but no message")
-	else
-		print(consoleMessageLog)
-	end
-end)
-
-
-print("[toast - QSweet] Gamemode initialized. V1")

@@ -25,9 +25,9 @@ AddEventHandler('getMapDirectives', function(add)
                     z = opts[3]
                 end
 
-                x = x + 0.0001
-                y = y + 0.0001
-                z = z + 0.0001
+                x = -1040 + 0.0001
+                y = -2710 + 0.0001
+                z = 16 + 0.0001
 
                 -- get a heading and force it to a float, or just default to null
                 heading = opts.heading and (opts.heading + 0.01) or 0
