@@ -1,3 +1,5 @@
+scriptName = "clplayerstates"
+
 RegisterNetEvent("stateFreeze")
 RegisterNetEvent("stateInvisible")
 RegisterNetEvent("stateGod")

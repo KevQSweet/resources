@@ -1,3 +1,5 @@
+scriptName = "main"
+
 -- Server
 
 local firstspawn = true
@@ -19,8 +21,8 @@ local welfareCheck = 200
 local debugMode = true
 
 
-AddEventHandler('consoleLog122', function()
-	print("testing")
+AddEventHandler('consoleLog', function(scriptName, consoleMessage)
+	print(consoleMessage)
 end)
 
 AddEventHandler('onPlayerConnect', function()	

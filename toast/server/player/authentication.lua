@@ -1,3 +1,5 @@
+scriptName = "autentication"
+
 -- Loading MySQL Class
 require "resources/toast/lib/MySQL"
 
@@ -89,7 +91,7 @@ function loginUser(password)
 				TriggerClientEvent("createTimer", source)
 				TriggerClientEvent("clientPaid", source)
 				
-				TriggerServerEvent("consoleLog122")
+				TriggerEvent("consoleLog", scriptName, username.." has logged in.")
 
 				
 				TriggerClientEvent("lastPosition", source)

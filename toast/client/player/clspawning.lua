@@ -1,3 +1,5 @@
+scriptName = "clspawning"
+
 RegisterNetEvent("spawnWeaponForPlayer")
 RegisterNetEvent("teleportSpawning")
 RegisterNetEvent("getPosition")
